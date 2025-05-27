@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cenzero Framework - Static File</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .api-endpoint {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin: 0.5rem 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Cenzero Framework</h1>
+        <p class="subtitle">Minimal but Powerful Node.js Web Framework</p>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🎯 Simple Routing</h3>
+                <p>Express-like routing with dynamic parameters</p>
+            </div>
+            <div class="feature">
+                <h3>🔧 Middleware Support</h3>
+                <p>Global and route-specific middleware</p>
+            </div>
+            <div class="feature">
+                <h3>📁 Static Files</h3>
+                <p>Built-in static file server</p>
+            </div>
+            <div class="feature">
+                <h3>🎨 Template Engine</h3>
+                <p>EJS and simple HTML template support</p>
+            </div>
+        </div>
+        
+        <h3>📋 Try these API endpoints:</h3>
+        <div class="api-endpoint">GET /</div>
+        <div class="api-endpoint">GET /users</div>
+        <div class="api-endpoint">GET /users/123</div>
+        <div class="api-endpoint">POST /users</div>
+        <div class="api-endpoint">GET /hello/yourname</div>
+    </div>
+</body>
+</html>
