@@ -75,7 +75,10 @@ export interface Route {
   path: string;
   handler: RouteHandler | ContextRouteHandler;
   middlewares: (MiddlewareFunction | ContextMiddlewareFunction)[]; // Per-route middlewares
-  useContext?: boolean; // Flag buat nentuin style mana yang dipake
+  useContext?: boolean; // Flag to determine which handler style is used
+  compiled?: {
+    segments: string[];
+  };
 }
 
 export interface RouterOptions {

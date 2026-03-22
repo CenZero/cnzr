@@ -317,7 +317,7 @@ export class CenzeroApp {
       requestCount: this.myRequestCount,
       uptime: ServerUtils.getStartupTime(),
       memoryUsage: process.memoryUsage(),
-      routes: this.myMainRouter.getRoutes?.length || 0,
+      routes: this.myMainRouter.getRoutes().length,
       middleware: this.myMiddlewareStack.length
     };
   }

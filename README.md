@@ -4,6 +4,8 @@
 
 # Cenzero Framework (cnzr)
 
+> Now at **v2.5** with faster route matching and an Astro-inspired animated CLI installer.
+
 A modern, minimalist yet powerful Node.js web framework built with TypeScript. Designed to be fast, developer-friendly, and feature-rich while maintaining simplicity. Competitive with Express.js, Fastify, and Hono.
 
 [![npm version](https://img.shields.io/npm/v/cnzr.svg)](https://www.npmjs.com/package/cnzr)
@@ -24,6 +26,7 @@ A modern, minimalist yet powerful Node.js web framework built with TypeScript. D
 
 ### Developer Experience
 - 🛠️ **Enhanced CLI** - Project scaffolding, development server, build tools
+- ✨ **Animated Scaffolding** - Friendly installer animation when creating new apps (Astro-style vibes)
 - 📁 **Static Files** - Efficient static file serving with caching
 - 🎨 **Template Engine** - EJS and HTML template support
 - � **Hot Reload** - Development server with automatic reloading

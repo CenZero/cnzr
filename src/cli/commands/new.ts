@@ -1,65 +1,105 @@
-import { mkdir, writeFile } from 'fs/promises';
-import { join } from 'path';
+import { mkdir, writeFile } from "fs/promises";
+import { join } from "path";
+
+const frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+
+function createSpinner(label: string) {
+  if (!process.stdout.isTTY) {
+    return {
+      update: (text: string) => console.log(`• ${text}`),
+      success: (text: string) => console.log(`✔ ${text}`),
+      fail: (text: string) => console.error(`✖ ${text}`),
+      stop: () => undefined,
+    };
+  }
+
+  let frame = 0;
+  let text = label;
+  const interval = setInterval(() => {
+    frame = (frame + 1) % frames.length;
+    process.stdout.write(`\r${frames[frame]} ${text}`);
+  }, 80);
+
+  return {
+    update: (nextText: string) => {
+      text = nextText;
+    },
+    success: (finalText: string) => {
+      clearInterval(interval);
+      process.stdout.write(`\r✔ ${finalText}\n`);
+    },
+    fail: (finalText: string) => {
+      clearInterval(interval);
+      process.stdout.write(`\r✖ ${finalText}\n`);
+    },
+    stop: () => clearInterval(interval),
+  };
+}
 
 export async function createProject(projectName: string, options: any) {
-  console.log(`🚀 Creating new Cenzero project: ${projectName}`);
-  
+  const spinner = createSpinner(`Creating ${projectName} with Cenzero 2.0...`);
+  spinner.update("Scaffolding directories");
+
   const projectPath = join(process.cwd(), projectName);
-  
+  const description = options?.description || "";
+
   try {
     // Create project directory structure
     await mkdir(projectPath, { recursive: true });
-    await mkdir(join(projectPath, 'src'), { recursive: true });
-    await mkdir(join(projectPath, 'public'), { recursive: true });
-    await mkdir(join(projectPath, 'views'), { recursive: true });
+    await mkdir(join(projectPath, "src"), { recursive: true });
+    await mkdir(join(projectPath, "public"), { recursive: true });
+    await mkdir(join(projectPath, "views"), { recursive: true });
 
+    spinner.update("Writing package.json");
     // Create package.json
     const packageJson = {
       name: projectName,
-      version: '1.0.0',
-      description: '',
-      main: 'src/index.ts',
+      version: "1.0.0",
+      description,
+      main: "src/index.ts",
       scripts: {
-        start: 'node dist/index.js',
-        dev: 'cnzr dev',
-        build: 'cnzr build'
+        start: "node dist/index.js",
+        dev: "cnzr dev",
+        build: "cnzr build",
       },
       dependencies: {
-        'cenzero': '^1.0.0'
+        cnzr: "^2.0.0",
       },
       devDependencies: {
-        '@types/node': '^20.0.0',
-        'typescript': '^5.0.0',
-        'ts-node': '^10.0.0'
-      }
+        "@types/node": "^20.0.0",
+        typescript: "^5.0.0",
+        "ts-node": "^10.0.0",
+      },
     };
 
     await writeFile(
-      join(projectPath, 'package.json'),
+      join(projectPath, "package.json"),
       JSON.stringify(packageJson, null, 2)
     );
 
+    spinner.update("Configuring TypeScript");
     // Create TypeScript config
     const tsConfig = {
       compilerOptions: {
-        target: 'ES2020',
-        module: 'commonjs',
-        outDir: './dist',
-        rootDir: './src',
+        target: "ES2020",
+        module: "commonjs",
+        outDir: "./dist",
+        rootDir: "./src",
         strict: true,
         esModuleInterop: true,
         skipLibCheck: true,
-        forceConsistentCasingInFileNames: true
-      }
+        forceConsistentCasingInFileNames: true,
+      },
     };
 
     await writeFile(
-      join(projectPath, 'tsconfig.json'),
+      join(projectPath, "tsconfig.json"),
       JSON.stringify(tsConfig, null, 2)
     );
 
+    spinner.update("Generating starter app");
     // Create main application file
-    const appCode = `import { CenzeroApp, CenzeroContext } from 'cenzero';
+    const appCode = `import { CenzeroApp, CenzeroContext } from 'cnzr';
 
 const app = new CenzeroApp();
 
@@ -119,8 +159,9 @@ app.listen(port, 'localhost', () => {
 });
 `;
 
-    await writeFile(join(projectPath, 'src', 'index.ts'), appCode);
+    await writeFile(join(projectPath, "src", "index.ts"), appCode);
 
+    spinner.update("Adding public assets");
     // Create basic HTML template
     const indexHtml = `<!DOCTYPE html>
 <html>
@@ -137,16 +178,17 @@ app.listen(port, 'localhost', () => {
 </body>
 </html>`;
 
-    await writeFile(join(projectPath, 'public', 'index.html'), indexHtml);
+    await writeFile(join(projectPath, "public", "index.html"), indexHtml);
 
-    console.log(`✅ Project ${projectName} created successfully!`);
-    console.log('\\nNext steps:');
+    spinner.success(`Project ${projectName} created successfully ✨`);
+    console.log("\nNext steps:");
     console.log(`  cd ${projectName}`);
-    console.log('  npm install');
-    console.log('  npm run dev');
-    
+    console.log("  npm install");
+    console.log("  npm run dev");
   } catch (error) {
-    console.error('❌ Error creating project:', error);
+    spinner.fail("Error creating project");
     process.exit(1);
+  } finally {
+    spinner.stop();
   }
 }
