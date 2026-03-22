@@ -10,13 +10,13 @@ describe("CLI new command", () => {
     await rm(projectPath, { recursive: true, force: true });
   });
 
-  test("scaffolds project with cnzr 2.0 template", async () => {
+  test("scaffolds project with current cnzr template", async () => {
     await createProject(projectName, {});
 
     const pkgRaw = await readFile(join(projectPath, "package.json"), "utf-8");
     const pkg = JSON.parse(pkgRaw);
 
-    expect(pkg.dependencies.cnzr).toBe("^2.0.0");
+    expect(pkg.dependencies.cnzr).toBe("^2.5.2");
 
     const indexRaw = await readFile(join(projectPath, "src", "index.ts"), "utf-8");
     expect(indexRaw).toContain("from 'cnzr'");

@@ -23,14 +23,14 @@ import {
 // TODO: Maybe add some performance monitoring later?
 // NOTE: Had to import everything manually - TypeScript auto-import was being weird
 
-// My personal ASCII banner - yeah, I'm that kind of dev 😎
+// Startup banner
 const CENZERO_BANNER = `
   ___  ____  __ _  ____  ____  ____   __  
  / __)(  __)(  ( \(__  )(  __)(  _ \ /  \ 
 ( (__  ) _) /    / / _/  ) _)  )   /(  O )
- \___)(____)\_)__)(____)(____)(__\_) \__/ 
+  \___)(____)\_)__)(____)(____)(__\_) \__/ 
              Cenzero Framework  
-    "Fast, flexible, and surprisingly fun" 🚀
+     "Fast, flexible, and surprisingly fun" 🚀
 `;
 
 // Helper utilities - gw bikin sendiri instead of importing lodash buat everything
@@ -339,7 +339,9 @@ export class CenzeroApp {
       
       // Quick debug toggle I added - helpful for development  
       if (this.debugMode) {
-        console.log(CENZERO_BANNER);
+        if (process.stdout.isTTY) {
+          console.log(CENZERO_BANNER);
+        }
         console.log(`🎯 ${ServerUtils.getRandomQuote()}`);
         console.log('');
         console.log('📊 Server Info:');
