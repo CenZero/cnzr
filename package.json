@@ -4,6 +4,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CenZero/cnzr.git"
+  },
+  "description": "Cenzero - A minimalist but powerful Node.js web framework",
+  "main": "dist/cjs/index.js",
   "name": "cnzr",
   "version": "2.5.0",
   "description": "Cenzero - A minimalist but powerful Node.js web framework",
