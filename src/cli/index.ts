@@ -1,12 +1,27 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
+import { existsSync, readFileSync } from "fs";
+import { join } from "path";
 import { createProject } from "./commands/new";
 import { devServer } from "./commands/dev";
 import { buildProject } from "./commands/build";
 import { generateRoute } from "./commands/generate";
 
-const packageJson = require("../../package.json");
+const packageJsonPathCandidates = [
+  join(__dirname, "..", "..", "package.json"),
+  join(__dirname, "..", "..", "..", "package.json"),
+];
+
+const packageJsonPath = packageJsonPathCandidates.find((candidate) =>
+  existsSync(candidate)
+);
+
+if (!packageJsonPath) {
+  throw new Error("Unable to locate package.json for CLI version.");
+}
+
+const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
 
 program
   .name("cnzr")
