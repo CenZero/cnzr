@@ -37,7 +37,7 @@ function createSpinner(label: string) {
 }
 
 export async function createProject(projectName: string, options: any) {
-  const spinner = createSpinner(`Creating ${projectName} with Cenzero 2.0...`);
+  const spinner = createSpinner(`Creating ${projectName} with Cenzero 2.5...`);
   spinner.update("Scaffolding directories");
 
   const projectPath = join(process.cwd(), projectName);
@@ -63,7 +63,7 @@ export async function createProject(projectName: string, options: any) {
         build: "cnzr build",
       },
       dependencies: {
-        cnzr: "^2.0.0",
+        cnzr: "^2.5.2",
       },
       devDependencies: {
         "@types/node": "^20.0.0",

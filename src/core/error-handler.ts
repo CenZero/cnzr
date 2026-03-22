@@ -362,15 +362,3 @@ export const {
   rateLimited,
   payloadTooLarge
 } = ErrorHandlerManager;
-
-// ASCII art untuk fun - karena error handling ga harus boring
-console.log(`
-     _____ _____ _   _ _____ _____ ____   ___  
-    /  __ \\  ___| \\ | |__  /|  ___| __ \\ / _ \\ 
-    | /  \\/| |__ |  \\| | / / | |__ |    || |_| |
-    | |    |  __|| . \` |/ /  |  __||    ||  _  |
-    | \\__/\\| |___| |\\  / /___| |___|    || | | |
-     \\____/\\____/\\_| \\_/_____|\\____/ |__||_| |_|
-    
-    🛠️  Error Handler loaded - siap handle semua chaos!
-`);
