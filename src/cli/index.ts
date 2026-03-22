@@ -8,6 +8,9 @@ import { devServer } from "./commands/dev";
 import { buildProject } from "./commands/build";
 import { generateRoute } from "./commands/generate";
 
+// Supports both source and built CLI execution contexts:
+// - src/cli/index.ts during local dev/test
+// - dist/cjs/cli/index.js after build/publish
 const packageJsonPathCandidates = [
   join(__dirname, "..", "..", "package.json"),
   join(__dirname, "..", "..", "..", "package.json"),
