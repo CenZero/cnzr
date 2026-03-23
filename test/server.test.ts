@@ -140,4 +140,34 @@ describe('CenzeroApp Core Functionality', () => {
       expect(app.getErrorHandler()).toBeDefined();
     });
   });
+
+  describe('Fullstack convenience env integration', () => {
+    test('should enable file routing when ENABLE_FILE_ROUTING=true', () => {
+      const previous = process.env.ENABLE_FILE_ROUTING;
+      process.env.ENABLE_FILE_ROUTING = 'true';
+
+      const envApp = new CenzeroApp({ useFileRouting: false });
+      expect((envApp as any).myFileBasedRouter).toBeDefined();
+
+      if (previous === undefined) {
+        delete process.env.ENABLE_FILE_ROUTING;
+      } else {
+        process.env.ENABLE_FILE_ROUTING = previous;
+      }
+    });
+
+    test('should enable file routing when FULLSTACK_MODE=true', () => {
+      const previous = process.env.FULLSTACK_MODE;
+      process.env.FULLSTACK_MODE = 'true';
+
+      const envApp = new CenzeroApp({ useFileRouting: false });
+      expect((envApp as any).myFileBasedRouter).toBeDefined();
+
+      if (previous === undefined) {
+        delete process.env.FULLSTACK_MODE;
+      } else {
+        process.env.FULLSTACK_MODE = previous;
+      }
+    });
+  });
 });

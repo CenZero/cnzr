@@ -131,6 +131,14 @@ export class CenzeroApp {
     // Check if we should enable debug mode from env - personal debugging preference
     this.debugMode = process.env.CENZERO_DEBUG === 'true' || this.myAppConfig.debug === true;
 
+    // Fullstack/dev convenience env flags from CLI (cnzr dev --fullstack)
+    if (!this.myAppConfig.useFileRouting && process.env.ENABLE_FILE_ROUTING === "true") {
+      this.myAppConfig.useFileRouting = true;
+    }
+    if (!this.myAppConfig.useFileRouting && process.env.FULLSTACK_MODE === "true") {
+      this.myAppConfig.useFileRouting = true;
+    }
+
     // Initialize file-based routing if enabled - optional feature gw tambahin  
     if (this.myAppConfig.useFileRouting) {
       this.myFileBasedRouter = new FileRouter(this, this.myAppConfig.routesDir);

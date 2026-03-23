@@ -42,6 +42,7 @@ export async function createProject(projectName: string, options: any) {
 
   const projectPath = join(process.cwd(), projectName);
   const description = options?.description || "";
+  const template = options?.template || "basic";
 
   try {
     // Create project directory structure
@@ -49,6 +50,9 @@ export async function createProject(projectName: string, options: any) {
     await mkdir(join(projectPath, "src"), { recursive: true });
     await mkdir(join(projectPath, "public"), { recursive: true });
     await mkdir(join(projectPath, "views"), { recursive: true });
+    if (template === "fullstack") {
+      await mkdir(join(projectPath, "src", "routes"), { recursive: true });
+    }
 
     spinner.update("Writing package.json");
     // Create package.json
@@ -179,6 +183,49 @@ app.listen(port, 'localhost', () => {
 </html>`;
 
     await writeFile(join(projectPath, "public", "index.html"), indexHtml);
+
+    if (template === "fullstack") {
+      spinner.update("Creating fullstack starter routes");
+      const homePage = `import { CenzeroContext } from 'cnzr';
+
+export async function homePage(ctx: CenzeroContext) {
+  ctx.html(\`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cenzero Fullstack Starter</title>
+</head>
+<body>
+  <h1>Cenzero Fullstack Starter</h1>
+  <p>Frontend page + backend API in one framework.</p>
+  <pre id="data">Loading...</pre>
+  <script>
+    fetch('/api/hello')
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('data').textContent = JSON.stringify(data, null, 2);
+      });
+  </script>
+</body>
+</html>\`);
+}
+`;
+
+      const apiHello = `import { CenzeroContext } from 'cnzr';
+
+export async function helloApi(ctx: CenzeroContext) {
+  ctx.json({
+    framework: 'cnzr',
+    mode: 'fullstack',
+    timestamp: new Date().toISOString(),
+  });
+}
+`;
+
+      await writeFile(join(projectPath, "src", "routes", "home.ts"), homePage);
+      await writeFile(join(projectPath, "src", "routes", "api-hello.ts"), apiHello);
+    }
 
     spinner.success(`Project ${projectName} created successfully ✨`);
     console.log("\nNext steps:");

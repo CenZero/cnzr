@@ -320,16 +320,28 @@ app.plugin(requestId());
 ### Create new project
 ```bash
 cnzr new <project-name> [options]
-  --template basic|advanced    # Project template
+  --template basic|fullstack   # Project template
   --typescript                 # TypeScript project
   --git                        # Initialize git repository
 ```
+
+### Generate route handlers
+```bash
+cnzr generate <route-name> [options]
+  --template basic|api|crud|fullstack|error
+  --status <code>             # For error template (default: 404)
+```
+
+`fullstack` template generates one file containing:
+- a server-rendered HTML page handler
+- a JSON data endpoint handler for frontend fetch usage
 
 ### Development server
 ```bash
 cnzr dev [options]
   --port <port>               # Server port (default: 3000)
   --host <host>               # Server host (default: localhost)
+  --fullstack                 # Enable fullstack convenience flags in dev env
   --file-routing              # Enable file-based routing
 ```
 
