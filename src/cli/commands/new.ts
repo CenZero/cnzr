@@ -67,7 +67,7 @@ export async function createProject(projectName: string, options: any) {
         build: "cnzr build",
       },
       dependencies: {
-        cnzr: "^2.5.2",
+        cnzr: "^2.5.3",
       },
       devDependencies: {
         "@types/node": "^20.0.0",

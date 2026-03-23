@@ -17,7 +17,8 @@ import {
   ContextRouteHandler,
   MiddlewareFunction, 
   ContextMiddlewareFunction,
-  CenzeroOptions
+  CenzeroOptions,
+  FetchHandler
 } from "./types";
 
 // TODO: Maybe add some performance monitoring later?
@@ -32,6 +33,8 @@ const CENZERO_BANNER = `
              Cenzero Framework  
      "Fast, flexible, and surprisingly fun" 🚀
 `;
+
+const EDGE_REMOTE_IP_HEADERS = ['cf-connecting-ip', 'x-forwarded-for', 'x-real-ip'] as const;
 
 // Helper utilities - gw bikin sendiri instead of importing lodash buat everything
 const ServerUtils = {
@@ -394,6 +397,44 @@ export class CenzeroApp {
     });
   }
 
+  // Expose a universal Fetch API handler for serverless/edge adapters
+  toFetchHandler(): FetchHandler {
+    return async (request: Request): Promise<Response> => {
+      const method = request.method.toUpperCase();
+      const requestUrl = new URL(request.url);
+      const headers: Record<string, string> = {};
+      request.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+
+      const bodyText = method === 'GET' || method === 'HEAD'
+        ? ''
+        : await this.readFetchRequestBody(request);
+      const req = this.createMockRequest(method, requestUrl, headers, bodyText);
+      const responseInfo = this.createMockResponseCollector();
+
+      await this.handleRequest(req, responseInfo.res);
+
+      if (!responseInfo.completed) {
+        responseInfo.end();
+      }
+
+      const responseHeaders = new Headers();
+      for (const [headerName, headerValue] of Object.entries(responseInfo.headers)) {
+        if (Array.isArray(headerValue)) {
+          headerValue.forEach((value) => responseHeaders.append(headerName, value));
+        } else if (headerValue !== undefined) {
+          responseHeaders.set(headerName, String(headerValue));
+        }
+      }
+
+      return new Response(responseInfo.body, {
+        status: responseInfo.statusCode || 200,
+        headers: responseHeaders
+      });
+    };
+  }
+
   // Main request handler - enhanced dengan request counting
   private async handleRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const cenzeroReq = req as CenzeroRequest;
@@ -588,5 +629,118 @@ export class CenzeroApp {
     }
     await this.myPluginMgr.onStop();
     this.myHttpServer.close(callback);
+  }
+
+  private createMockRequest(
+    method: string,
+    parsedUrl: URL,
+    headers: Record<string, string>,
+    bodyText: string
+  ): IncomingMessage {
+    const listeners: Record<string, Array<(...args: any[]) => void>> = {};
+    const remoteAddress = EDGE_REMOTE_IP_HEADERS
+      .map((headerName) => headers[headerName])
+      .find((value) => Boolean(value)) || '127.0.0.1';
+
+    const emit = (event: string, ...args: any[]) => {
+      const handlers = listeners[event] || [];
+      handlers.forEach((handler) => handler(...args));
+      return true;
+    };
+
+    const req: any = {
+      method,
+      url: `${parsedUrl.pathname}${parsedUrl.search}`,
+      headers,
+      connection: { remoteAddress } as any,
+      socket: { remoteAddress } as any,
+      on(event: string, listener: (...args: any[]) => void) {
+        listeners[event] = listeners[event] || [];
+        listeners[event].push(listener);
+        return this;
+      },
+      emit,
+    };
+
+    queueMicrotask(() => {
+      if (bodyText) {
+        emit('data', Buffer.from(bodyText));
+      }
+      emit('end');
+    });
+
+    return req;
+  }
+
+  private async readFetchRequestBody(request: Request): Promise<string> {
+    if (request.bodyUsed) {
+      throw new Error('Cannot read Fetch request body because it has already been consumed');
+    }
+    return request.text();
+  }
+
+  private createMockResponseCollector(): {
+    res: ServerResponse;
+    headers: Record<string, string | string[]>;
+    statusCode: number;
+    body: string;
+    completed: boolean;
+    end: (chunk?: any) => void;
+  } {
+    const headers: Record<string, string | string[]> = {};
+    let statusCode = 200;
+    let body = '';
+    let completed = false;
+
+    const res: any = {
+      get statusCode() {
+        return statusCode;
+      },
+      set statusCode(code: number) {
+        statusCode = code;
+      },
+      headersSent: false,
+      setHeader(name: string, value: number | string | readonly string[]) {
+        headers[name] = Array.isArray(value) ? [...value] as string[] : String(value);
+        return this;
+      },
+      getHeader(name: string) {
+        return headers[name];
+      },
+      writeHead(code: number, head?: any) {
+        statusCode = code;
+        if (head && typeof head === 'object') {
+          Object.entries(head).forEach(([key, value]) => {
+            headers[key] = Array.isArray(value) ? [...value] as string[] : String(value);
+          });
+        }
+        return this;
+      },
+      end(chunk?: any) {
+        if (chunk !== undefined) {
+          body += typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString();
+        }
+        completed = true;
+        (res as any).headersSent = true;
+        return this;
+      }
+    };
+
+    return {
+      res,
+      headers,
+      get statusCode() {
+        return statusCode;
+      },
+      get body() {
+        return body;
+      },
+      get completed() {
+        return completed;
+      },
+      end(chunk?: any) {
+        res.end?.(chunk);
+      }
+    };
   }
 }

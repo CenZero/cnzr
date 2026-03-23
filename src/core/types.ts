@@ -94,6 +94,9 @@ export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS'
 export type Handler = RouteHandler;
 export type ContextHandler = ContextRouteHandler;
 
+// Universal Fetch API handler for serverless/edge runtimes
+export type FetchHandler = (request: Request) => Promise<Response>;
+
 // Main framework options - ini yang dipake di constructor
 export interface CenzeroOptions {
   port?: number; // Default 3000
