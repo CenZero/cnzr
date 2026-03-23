@@ -16,7 +16,7 @@ describe("CLI new command", () => {
     const pkgRaw = await readFile(join(projectPath, "package.json"), "utf-8");
     const pkg = JSON.parse(pkgRaw);
 
-    expect(pkg.dependencies.cnzr).toBe("^2.5.2");
+    expect(pkg.dependencies.cnzr).toBe("^2.5.3");
 
     const indexRaw = await readFile(join(projectPath, "src", "index.ts"), "utf-8");
     expect(indexRaw).toContain("from 'cnzr'");

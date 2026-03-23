@@ -37,6 +37,38 @@ describe('CenzeroApp Core Functionality', () => {
         });
       });
     });
+
+    test('should expose Fetch API handler for edge/serverless runtimes', async () => {
+      app.get('/edge', (ctx: any) => {
+        return ctx.json({ runtime: 'fetch' });
+      });
+
+      const handler = app.toFetchHandler();
+      const response = await handler(new Request('https://example.com/edge'));
+      const payload = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(payload).toEqual({ runtime: 'fetch' });
+    });
+
+    test('should parse JSON body through Fetch API handler', async () => {
+      app.post('/edge-body', (ctx: any) => {
+        return ctx.json({ body: ctx.body });
+      });
+
+      const handler = app.toFetchHandler();
+      const response = await handler(new Request('https://example.com/edge-body', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({ hello: 'world' })
+      }));
+      const payload = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(payload).toEqual({ body: { hello: 'world' } });
+    });
   });
 
   describe('HTTP Methods', () => {

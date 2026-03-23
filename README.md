@@ -4,7 +4,7 @@
 
 # Cenzero Framework (cnzr)
 
-> Now at **v2.5.2** with faster route matching and an Astro-inspired animated CLI installer.
+> Now at **v2.5.3** with fetch-handler support for serverless adapters and an Astro-inspired animated CLI installer.
 
 A modern, minimalist yet powerful Node.js web framework built with TypeScript. Designed to be fast, developer-friendly, and feature-rich while maintaining simplicity. Competitive with Express.js, Fastify, and Hono.
 
@@ -134,6 +134,29 @@ const customPlugin = {
 
 app.plugin(customPlugin);
 ```
+
+Plugin authoring is intentionally based on simple lifecycle hooks (`onRequest`, `onResponse`, `onError`, `onStart`, plus context hooks for compatibility). This lowers the barrier for ecosystem growth across database adapters, GraphQL integration, advanced rate limiting, and more.
+
+### Serverless / Edge Adapters (Fetch API)
+
+Besides `app.listen()`, you can expose a universal Fetch API handler:
+
+```typescript
+import { CenzeroApp } from 'cnzr';
+
+const app = new CenzeroApp();
+
+app.get('/', (ctx) => ctx.json({ ok: true }));
+
+// For serverless/edge adapter layers
+export const fetch = app.toFetchHandler();
+```
+
+This keeps your route/middleware/plugin logic in one place while letting adapter code integrate with runtimes that expect `Request -> Response`.
+
+### Documentation at Scale
+
+README remains focused on quick start. For larger adoption, recommended next step is a dedicated docs site (for example VitePress or Docusaurus) that covers deployment patterns, testing strategies, plugin recipes, and production best practices.
 
 ### File-based Routing
 
