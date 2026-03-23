@@ -34,7 +34,7 @@ program
 program
   .command("new <project-name>")
   .description("Create a new Cenzero project")
-  .option("-t, --template <template>", "Project template", "basic")
+  .option("-t, --template <template>", "Project template (basic, fullstack)", "basic")
   .action(createProject);
 
 program
@@ -59,7 +59,7 @@ program
   .option("-d, --dir <directory>", "Output directory", "src/routes")
   .option(
     "-t, --template <template>",
-    "Template type (basic, api, crud)",
+    "Template type (basic, api, crud, fullstack)",
     "basic"
   )
   .action((routeName: string, options: any) => {

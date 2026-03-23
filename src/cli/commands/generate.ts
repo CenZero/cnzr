@@ -6,7 +6,7 @@ interface RouteOptions {
   method?: string;
   path?: string;
   dir?: string;
-  template?: "basic" | "crud" | "api";
+  template?: "basic" | "crud" | "api" | "fullstack";
 }
 
 const ROUTE_TEMPLATES = {
@@ -181,6 +181,60 @@ export async function delete${capitalizedEntity}(ctx: CenzeroContext) {
 }
 `;
   },
+
+  fullstack: (routeName: string, method: string, routePath: string) => `import { CenzeroContext } from "cnzr";
+
+/**
+ * ${method.toUpperCase()} ${routePath}
+ * Fullstack page handler with integrated frontend + backend data endpoint.
+ */
+export async function ${routeName}Page(ctx: CenzeroContext) {
+  ctx.html(\`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${routeName} - Cenzero Fullstack</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; margin: 2rem; color: #1f2937; }
+    .card { max-width: 720px; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem 1.2rem; }
+    pre { background: #f9fafb; border-radius: 8px; padding: .8rem; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>${routeName} fullstack route</h1>
+    <p>This page fetches backend JSON from <code>${routePath}/data</code>.</p>
+    <pre id="result">Loading...</pre>
+  </div>
+  <script>
+    fetch("${routePath}/data")
+      .then((r) => r.json())
+      .then((data) => {
+        document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+      })
+      .catch((error) => {
+        document.getElementById("result").textContent = "Error: " + error.message;
+      });
+  </script>
+</body>
+</html>\`);
+}
+
+/**
+ * GET ${routePath}/data
+ * Backend JSON endpoint used by the frontend page.
+ */
+export async function ${routeName}Data(ctx: CenzeroContext) {
+  ctx.json({
+    route: "${routeName}",
+    path: "${routePath}",
+    mode: "fullstack",
+    method: "${method.toUpperCase()}",
+    timestamp: new Date().toISOString(),
+  });
+}
+`,
 };
 
 async function fileExists(path: string): Promise<boolean> {
@@ -226,6 +280,8 @@ export async function generateRoute(
 
     if (template === "crud") {
       routeCode = ROUTE_TEMPLATES.crud(routeName, method, path);
+    } else if (template === "fullstack") {
+      routeCode = ROUTE_TEMPLATES.fullstack(routeName, method, path);
     } else if (template === "api") {
       routeCode = ROUTE_TEMPLATES.api(routeName, method, path);
     } else {
@@ -257,6 +313,13 @@ app.get('${path}/:id', get${capitalizedEntity});
 app.post('${path}', create${capitalizedEntity});
 app.put('${path}/:id', update${capitalizedEntity});
 app.delete('${path}/:id', delete${capitalizedEntity});
+      `);
+    } else if (template === "fullstack") {
+      console.log(`
+import { ${routeName}Page, ${routeName}Data } from '${importBase}/${routeName}';
+
+app.${method}('${path}', ${routeName}Page);
+app.get('${path}/data', ${routeName}Data);
       `);
     } else {
       console.log(`

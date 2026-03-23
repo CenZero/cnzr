@@ -36,6 +36,13 @@ describe("CLI new command", () => {
 
     expect(pkg.description).toBe("Demo app");
   });
+
+  test("creates fullstack starter routes when fullstack template is selected", async () => {
+    await createProject(projectName, { template: "fullstack" });
+
+    expect(await exists(join(projectPath, "src", "routes", "home.ts"))).toBe(true);
+    expect(await exists(join(projectPath, "src", "routes", "api-hello.ts"))).toBe(true);
+  });
 });
 
 async function exists(path: string): Promise<boolean> {

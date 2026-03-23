@@ -320,10 +320,20 @@ app.plugin(requestId());
 ### Create new project
 ```bash
 cnzr new <project-name> [options]
-  --template basic|advanced    # Project template
+  --template basic|fullstack   # Project template
   --typescript                 # TypeScript project
   --git                        # Initialize git repository
 ```
+
+### Generate route handlers
+```bash
+cnzr generate <route-name> [options]
+  --template basic|api|crud|fullstack
+```
+
+`fullstack` template generates one file containing:
+- a server-rendered HTML page handler
+- a JSON data endpoint handler for frontend fetch usage
 
 ### Development server
 ```bash

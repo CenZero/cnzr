@@ -1,4 +1,4 @@
-import { mkdir, writeFile, access, rm } from "fs/promises";
+import { access, readFile, rm } from "fs/promises";
 import { join } from "path";
 import { constants } from "fs";
 import { generateRoute } from "../src/cli/commands/generate";
@@ -8,7 +8,6 @@ declare const test: any;
 declare const beforeEach: any;
 declare const afterEach: any;
 declare const expect: any;
-declare const jest: any;
 
 describe("CLI Route Generator", () => {
   const testDir = join(process.cwd(), "test-routes");
@@ -94,6 +93,26 @@ describe("CLI Route Generator", () => {
     const exists = await fileExists(filePath);
 
     expect(exists).toBe(true);
+  });
+
+  test("should generate fullstack route template", async () => {
+    const routeName = "dashboard";
+
+    await generateRoute(routeName, {
+      method: "get",
+      path: "/dashboard",
+      dir: testDir,
+      template: "fullstack" as any,
+    });
+
+    const filePath = join(testDir, `${routeName}.ts`);
+    const exists = await fileExists(filePath);
+    expect(exists).toBe(true);
+
+    const content = await readFile(filePath, "utf-8");
+    expect(content).toContain("export async function dashboardPage");
+    expect(content).toContain("export async function dashboardData");
+    expect(content).toContain('fetch("/dashboard/data")');
   });
 
   test("should use default options when not provided", async () => {
