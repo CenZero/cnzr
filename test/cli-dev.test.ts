@@ -46,4 +46,3 @@ describe("CLI dev command", () => {
     expect(call[2].env.ENABLE_FILE_ROUTING).toBe("false");
   });
 });
-

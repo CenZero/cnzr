@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from "fs";
 
 // Personal development utilities - karena gw males pake library besar
 // Collection of handy functions yang sering gw butuhin
