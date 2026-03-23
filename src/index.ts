@@ -20,7 +20,6 @@ export { rateLimiterMiddleware, createRateLimiterMiddleware } from "./middleware
 
 // Dev utilities exports - personal fun stuff dan custom utilities
 export { getRandomJoke, getRandomMotivation, getMorningVibes, getRandomSlang, detectEasterEgg, getRandomBanner } from "./utils/dev-jokes";
-export { deepMerge, debounce, throttle, retry, formatBytes, randomString, pick, omit, devLog, measure } from "./utils/dev-utils";
 export * from "./utils/dev-utils";
 
 // Default export for convenience - most people probably want this

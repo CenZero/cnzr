@@ -15,4 +15,3 @@ describe("framework index exports", () => {
     expect(typeof SimpleFileWatcher).toBe("function");
   });
 });
-
