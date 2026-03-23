@@ -115,6 +115,24 @@ describe("CLI Route Generator", () => {
     expect(content).toContain('fetch("/dashboard/data")');
   });
 
+  test("should generate error page template with custom status code", async () => {
+    const routeName = "errorPage";
+
+    await generateRoute(routeName, {
+      dir: testDir,
+      template: "error" as any,
+      statusCode: "500",
+    });
+
+    const filePath = join(testDir, `${routeName}.ts`);
+    expect(await fileExists(filePath)).toBe(true);
+
+    const content = await readFile(filePath, "utf-8");
+    expect(content).toContain("export async function handle500");
+    expect(content).toContain("ctx.status(500).html");
+    expect(content).toContain("Dev hint: inspect server logs");
+  });
+
   test("should use default options when not provided", async () => {
     const routeName = "defaultRoute";
 

@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+
 // Personal development utilities - karena gw males pake library besar
 // Collection of handy functions yang sering gw butuhin
 
@@ -255,3 +257,181 @@ export const measure = async <T>(
   
   return result;
 };
+
+/**
+ * Simple diagnostics helper for development environments
+ */
+export const diagnostics = {
+  checkNodeVersion: (minVersion: string = '14.0.0'): { valid: boolean; current: string; required: string } => {
+    const current = process.version.replace(/^v/, '');
+    const currentParts = current.split('.').map(Number);
+    const minParts = minVersion.split('.').map(Number);
+
+    let valid = true;
+    for (let i = 0; i < 3; i++) {
+      if ((currentParts[i] || 0) < (minParts[i] || 0)) {
+        valid = false;
+        break;
+      }
+      if ((currentParts[i] || 0) > (minParts[i] || 0)) {
+        break;
+      }
+    }
+
+    return {
+      valid,
+      current: process.version,
+      required: minVersion,
+    };
+  },
+
+  getEnvInfo: () => ({
+    nodeVersion: process.version,
+    platform: process.platform,
+    arch: process.arch,
+    nodeEnv: process.env.NODE_ENV || 'development',
+    cwd: process.cwd(),
+    pid: process.pid,
+  }),
+
+  checkRequiredEnvVars: (vars: string[]): { present: string[]; missing: string[] } => {
+    const present: string[] = [];
+    const missing: string[] = [];
+
+    for (const name of vars) {
+      if (process.env[name]) {
+        present.push(name);
+      } else {
+        missing.push(name);
+      }
+    }
+
+    return { present, missing };
+  },
+};
+
+/**
+ * Small performance profiler for dev measurement loops
+ */
+export class PerformanceProfiler {
+  private timers = new Map<string, bigint>();
+  private samples = new Map<string, number[]>();
+
+  start(label: string): void {
+    this.timers.set(label, process.hrtime.bigint());
+  }
+
+  end(label: string): number {
+    const startedAt = this.timers.get(label);
+    if (!startedAt) return 0;
+
+    const duration = Number(process.hrtime.bigint() - startedAt) / 1000000;
+    this.timers.delete(label);
+
+    const existing = this.samples.get(label) || [];
+    existing.push(duration);
+    this.samples.set(label, existing);
+    return duration;
+  }
+
+  getStats(label: string): { count: number; min: number; max: number; avg: number; total: number } | null {
+    const values = this.samples.get(label);
+    if (!values || values.length === 0) return null;
+
+    const total = values.reduce((sum, value) => sum + value, 0);
+    return {
+      count: values.length,
+      min: Math.min(...values),
+      max: Math.max(...values),
+      avg: total / values.length,
+      total,
+    };
+  }
+
+  clear(): void {
+    this.timers.clear();
+    this.samples.clear();
+  }
+}
+
+/**
+ * ANSI color helpers for CLI developer tooling
+ */
+export const colors = {
+  error: (text: string) => `\x1b[31m${text}\x1b[0m`,
+  success: (text: string) => `\x1b[32m${text}\x1b[0m`,
+  warn: (text: string) => `\x1b[33m${text}\x1b[0m`,
+  info: (text: string) => `\x1b[36m${text}\x1b[0m`,
+  strong: (text: string) => `\x1b[1m${text}\x1b[0m`,
+};
+
+/**
+ * Tiny request timer utility for profiling request phases
+ */
+export class RequestTimer {
+  private readonly startedAt: bigint;
+  private marks = new Map<string, bigint>();
+  readonly label: string;
+
+  constructor(label: string = `request_${Date.now()}`) {
+    this.label = label;
+    this.startedAt = process.hrtime.bigint();
+  }
+
+  mark(name: string): void {
+    this.marks.set(name, process.hrtime.bigint());
+  }
+
+  getElapsed(): number {
+    return Number(process.hrtime.bigint() - this.startedAt) / 1000000;
+  }
+
+  getMarkDuration(from: string, to: string): number {
+    const fromMark = this.marks.get(from);
+    const toMark = this.marks.get(to);
+    if (!fromMark || !toMark) return 0;
+    return Number(toMark - fromMark) / 1000000;
+  }
+
+  getReport(): { label: string; totalTime: number; marks: { name: string; elapsed: number }[] } {
+    return {
+      label: this.label,
+      totalTime: this.getElapsed(),
+      marks: Array.from(this.marks.entries()).map(([name, timestamp]) => ({
+        name,
+        elapsed: Number(timestamp - this.startedAt) / 1000000,
+      })),
+    };
+  }
+}
+
+/**
+ * Minimal wrapper around fs.watch for local dev workflows
+ */
+export class SimpleFileWatcher {
+  private watchers = new Map<string, fs.FSWatcher>();
+
+  watch(filePath: string, callback: (event: 'change' | 'rename') => void): () => void {
+    if (this.watchers.has(filePath)) {
+      return () => undefined;
+    }
+
+    const watcher = fs.watch(filePath, (event) => {
+      callback(event as 'change' | 'rename');
+    });
+
+    this.watchers.set(filePath, watcher);
+
+    return () => {
+      watcher.close();
+      this.watchers.delete(filePath);
+    };
+  }
+
+  unwatchAll(): void {
+    for (const watcher of this.watchers.values()) {
+      watcher.close();
+    }
+    this.watchers.clear();
+  }
+}

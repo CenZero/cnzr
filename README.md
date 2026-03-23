@@ -328,7 +328,8 @@ cnzr new <project-name> [options]
 ### Generate route handlers
 ```bash
 cnzr generate <route-name> [options]
-  --template basic|api|crud|fullstack
+  --template basic|api|crud|fullstack|error
+  --status <code>             # For error template (default: 404)
 ```
 
 `fullstack` template generates one file containing:
@@ -340,6 +341,7 @@ cnzr generate <route-name> [options]
 cnzr dev [options]
   --port <port>               # Server port (default: 3000)
   --host <host>               # Server host (default: localhost)
+  --fullstack                 # Enable fullstack convenience flags in dev env
   --file-routing              # Enable file-based routing
 ```
 

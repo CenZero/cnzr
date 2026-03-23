@@ -5,6 +5,11 @@ export function devServer(options: any) {
   
   const port = options.port || 3000;
   const host = options.host || 'localhost';
+  const fullstack = options.fullstack === true;
+
+  if (fullstack) {
+    console.log('🧩 Fullstack dev mode enabled (Astro-inspired convenience flags)');
+  }
   
   // Start the development server with ts-node as requested
   const child = spawn('npx', ['ts-node', 'src/index.ts'], {
@@ -13,7 +18,9 @@ export function devServer(options: any) {
       ...process.env,
       NODE_ENV: 'development',
       PORT: port,
-      HOST: host
+      HOST: host,
+      FULLSTACK_MODE: fullstack ? 'true' : 'false',
+      ENABLE_FILE_ROUTING: fullstack ? 'true' : 'false',
     }
   });
 

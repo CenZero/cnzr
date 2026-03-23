@@ -6,7 +6,8 @@ interface RouteOptions {
   method?: string;
   path?: string;
   dir?: string;
-  template?: "basic" | "crud" | "api" | "fullstack";
+  template?: "basic" | "crud" | "api" | "fullstack" | "error";
+  statusCode?: string;
 }
 
 const ROUTE_TEMPLATES = {
@@ -235,6 +236,50 @@ export async function ${routeName}Data(ctx: CenzeroContext) {
   });
 }
 `,
+
+  error: (routeName: string, statusCode: string) => `import { CenzeroContext } from "cnzr";
+
+/**
+ * Error page template for HTTP ${statusCode}
+ * Astro-inspired DX: clean UI + optional dev hints
+ */
+export async function handle${statusCode}(ctx: CenzeroContext) {
+  const isDev = process.env.NODE_ENV === "development";
+  ctx.status(${statusCode}).html(\`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${statusCode} - ${routeName}</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: Inter, Arial, sans-serif; min-height: 100vh; margin: 0; display: grid; place-items: center; background: #f6f7fb; color: #1f2937; }
+    .card { width: min(680px, 92vw); background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 1.4rem 1.2rem; box-shadow: 0 10px 30px rgba(15,23,42,.08); }
+    h1 { margin: 0 0 .6rem; font-size: 2.2rem; }
+    p { margin: .35rem 0; line-height: 1.5; }
+    .muted { color: #6b7280; font-size: .95rem; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #0f172a; color: #e5e7eb; }
+      .card { background: #111827; border-color: #374151; box-shadow: none; }
+      .muted { color: #9ca3af; }
+      a { color: #60a5fa; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Error ${statusCode}</h1>
+    <p>We hit a problem while rendering this page.</p>
+    <p class="muted">Generated template: ${routeName}.ts</p>
+    \${isDev ? '<p class="muted">Dev hint: inspect server logs and route wiring.</p>' : ''}
+    <p><a href="/">← Back to home</a></p>
+  </main>
+</body>
+</html>\`);
+}
+`,
 };
 
 async function fileExists(path: string): Promise<boolean> {
@@ -255,7 +300,9 @@ export async function generateRoute(
     path = `/${routeName}`,
     dir = "src/routes",
     template = "basic",
+    statusCode = "404",
   } = options;
+  const safeStatusCode = /^\d{3}$/.test(statusCode) ? statusCode : "404";
 
   console.log(`🔧 Generating ${template} route: ${routeName}`);
 
@@ -278,7 +325,9 @@ export async function generateRoute(
     // Generate route code based on template
     let routeCode: string;
 
-    if (template === "crud") {
+    if (template === "error") {
+      routeCode = ROUTE_TEMPLATES.error(routeName, safeStatusCode);
+    } else if (template === "crud") {
       routeCode = ROUTE_TEMPLATES.crud(routeName, method, path);
     } else if (template === "fullstack") {
       routeCode = ROUTE_TEMPLATES.fullstack(routeName, method, path);
@@ -300,7 +349,16 @@ export async function generateRoute(
       ? relativeBase
       : `./${relativeBase}`;
 
-    if (template === "crud") {
+    if (template === "error") {
+      console.log(`
+import { handle${safeStatusCode} } from '${importBase}/${routeName}';
+
+app.onError((error, ctx) => {
+  if ((error as any).status === ${safeStatusCode}) return handle${safeStatusCode}(ctx);
+  return ctx.status(500).json({ error: 'Internal Server Error' });
+});
+      `);
+    } else if (template === "crud") {
       const entityName = routeName.replace(/Handler$/, "");
       const capitalizedEntity =
         entityName.charAt(0).toUpperCase() + entityName.slice(1);

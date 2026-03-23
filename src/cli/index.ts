@@ -42,6 +42,7 @@ program
   .description("Start development server")
   .option("-p, --port <port>", "Port number", "3000")
   .option("-h, --host <host>", "Host address", "localhost")
+  .option("-f, --fullstack", "Enable fullstack dev mode convenience flags", false)
   .action(devServer);
 
 program
@@ -59,15 +60,17 @@ program
   .option("-d, --dir <directory>", "Output directory", "src/routes")
   .option(
     "-t, --template <template>",
-    "Template type (basic, api, crud, fullstack)",
+    "Template type (basic, api, crud, fullstack, error)",
     "basic"
   )
+  .option("-s, --status <code>", "HTTP status code for error template", "404")
   .action((routeName: string, options: any) => {
     generateRoute(routeName, {
       method: options.method,
       path: options.path || `/${routeName}`,
       dir: options.dir,
       template: options.template,
+      statusCode: options.status,
     });
   });
 
