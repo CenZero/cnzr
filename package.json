@@ -1,6 +1,6 @@
 {
   "name": "cnzr",
-  "version": "2.5.3",
+  "version": "2.5.5",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CenZero/cnzr.git"
@@ -91,7 +91,8 @@
   },
   "overrides": {
     "minimatch": "^9.0.4",
-    "brace-expansion": "^2.0.1",
+    "brace-expansion": "^2.0.3",
+    "picomatch": "^2.3.2",
     "js-yaml": "^4.1.0",
     "diff": "^5.2.0",
     "glob": "^11.0.0"
