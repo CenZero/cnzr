@@ -4,7 +4,7 @@
 
 # Cenzero Framework (cnzr)
 
-> Now at **v2.5.3** with fetch-handler support for serverless adapters and an Astro-inspired animated CLI installer.
+> Now at **v2.5.5** with fetch-handler support for serverless adapters and an Astro-inspired animated CLI installer.
 
 A modern, minimalist yet powerful Node.js web framework built with TypeScript. Designed to be fast, developer-friendly, and feature-rich while maintaining simplicity. Competitive with Express.js, Fastify, and Hono.
 
